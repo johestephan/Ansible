@@ -1,0 +1,9 @@
+---
+- hosts: linux
+
+  tasks:
+          - name: copy SSL cert
+            copy:
+              src: ~/Letsencrypt/etc/live/
+              dest: /etc/letsencrypt/live
+              mode: '0644'

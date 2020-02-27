@@ -1,0 +1,52 @@
+---
+- hosts: linux
+  vars:
+    filebeatserver: "127.0.0.1"
+
+  tasks:
+    - name: Add multiple repositories into the same file (1/2)
+      yum_repository:
+        name: Elastic-repo-7.x
+        description: elastic repo
+        file: external_repos
+        baseurl: https://artifacts.elastic.co/packages/oss-7.x/yum/
+        gpgcheck: no
+    - name: system update
+      yum:
+        name: '*'
+        state: latest
+    - name: Install mandatory packages
+      yum:
+        name:
+          - iptables
+          - python3
+          - python3-pip
+          - screen
+          - wget
+          - filebeat
+        state: present
+    - name: Install python modules
+      pip:
+        name:
+          - ipython
+          - cloudant
+    - name: copy SSL cert
+      copy:
+        src: ~/Letsencrypt/etc/live/
+        dest: /etc/letsencrypt/live
+        mode: '0644'
+    - name: copy Filebeat SSL cert
+      copy:
+        src: ~/Letsencrypt/etc/Logstash/logstash.crt
+        dest: /etc/ssl/logstash-forwarder.crt
+        mode: '0644'
+    - name: Download filebeat.conf
+      get_url:
+        url: https://raw.githubusercontent.com/johestephan/Configurations/master/Elasticsearch/filebeat_config.yml
+        dest: /etc/filebeat/filebeat.yml
+        mode: '0640'
+    - name: adjust config of filebeat_config
+      replace:
+        path: /etc/filebeat/filebeat.yml
+        regexp: '<<changeme>>'
+        replace: '{{ filebeatserver }}'

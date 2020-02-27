@@ -1,0 +1,12 @@
+---
+- hosts: linux
+ 
+  tasks:
+          - name: Get hostname for testing purpose
+            command: /bin/hostname
+            changed_when: False
+            register: hostname
+ 
+          - debug: var={{ item }}
+            with_items:
+                    - hostname.stdout
